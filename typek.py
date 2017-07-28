@@ -65,7 +65,6 @@ def get_temp(cold_junction, tc_voltage):
     :cold_junction:
       temperature of the cold junction in degrees C
     :tc_voltage:
-      voltage from the thermocouple in volts
+      voltage from the thermocouple in millivolts
     """
-    mV = tc_voltage * 1000
-    return mV_to_C(C_to_mV(cold_junction) + mV)
+    return mV_to_C(C_to_mV(cold_junction) + tc_voltage)
