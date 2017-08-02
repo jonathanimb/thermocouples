@@ -5,7 +5,7 @@
 from bisect import bisect
 
 # type K decades from https://srdata.nist.gov/its90/download/type_k.tab
-DEGREES_C = range(-270, 1380, 10)
+DEGREES_C = list(range(-270, 1380, 10))
 MILLIVOLTS = [-6.458, -6.441, -6.404, -6.344, -6.262, -6.158, -6.035, -5.891,
 -5.730, -5.550, -5.354, -5.141, -4.913, -4.669, -4.411, -4.138, -3.852, -3.554,
 -3.243, -2.920, -2.587, -2.243, -1.889, -1.527, -1.156, -0.778, -0.392, 0.000,
@@ -32,11 +32,11 @@ def C_to_mV(C):
     '''convert degrees C to millivolts'''
     if not -270 <= C <= 1370:
         raise OutOfRangeError('C out of range. Expected value between -270 and 1370, got {}'.format(C))
-    idx = bisect(DEGREES_C, C)
-    y1 = MILLIVOLTS[idx-1]
+    idx = C//10+28 # faster than bisect
     x = C % 10
-    if x == 0:
-        return y1
+    y1 = MILLIVOLTS[idx-1]
+    #~ if x == 0: # this check adds about 10 ns on average to each calculation. For non-random data this check would save some time.
+        #~ return y1
     y2 = MILLIVOLTS[idx]
     # (rise over run) * x + b; run is always 10
     mV = ((y2 - y1) / 10.) * x + y1
@@ -68,3 +68,24 @@ def get_temp(cold_junction, tc_voltage):
       voltage from the thermocouple in millivolts
     """
     return mV_to_C(C_to_mV(cold_junction) + tc_voltage)
+
+def main():
+    import matplotlib.pyplot as plt
+    import time
+    plt.plot(DEGREES_C, MILLIVOLTS, 'o')
+    xdata = range(-270, 1370)
+    plt.plot(xdata, [C_to_mV(x) for x in xdata])
+    plt.show()
+
+def main2():
+    import time
+    import random
+    data = [random.randint(-6000, 20000)/1000. for _ in range(1000000)]
+    for _ in range(10):
+        start = time.time()
+        ydata = [get_temp(26, x) for x in data]
+        elapsed = time.time() - start
+        print('took {} seconds'.format(elapsed))
+
+if __name__ == "__main__":
+    main()
