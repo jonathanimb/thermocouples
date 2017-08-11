@@ -1,6 +1,9 @@
 
+# the defined voltage response from a type K thermocouple
 # from https://srdata.nist.gov/its90/download/type_k.tab
+
 ktype = {
+    #temp in C: millivolt response
     -270: -6.458,
     -269: -6.457,
     -268: -6.456,
